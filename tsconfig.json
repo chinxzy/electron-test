@@ -1,0 +1,24 @@
+{
+  "files": [],
+  "compilerOptions": {
+    // ... other options
+    "target": "esnext", // Or "es2020", "es2022", "node16", "nodenext"
+    "module": "esnext", // <--- CRITICAL FIX: Set this to a modern module system
+    // If you are targeting Node.js specifically, 'Node16' or 'NodeNext' is often preferred.
+    // For Electron's main/preload, 'CommonJS' is often the output format, but 'module'
+    // refers to the *input* module system for TypeScript.
+    "moduleResolution": "node" // Or "bundler" for newer Vite versions
+    // ... other options
+  },
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.vitest.json"
+    }
+  ]
+}
