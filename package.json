@@ -10,8 +10,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "lintint",
-        "repo": "oditorwebpos",
+        "owner": "chinxzy",
+        "repo": "electron-test",
         "private": true
       }
     ]

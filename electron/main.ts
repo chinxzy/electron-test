@@ -108,8 +108,8 @@ app.whenReady().then(() => {
   if (app.isPackaged) {
     autoUpdater.setFeedURL({
       provider: 'github',
-      owner: 'lintint',
-      repo: 'oditorwebpos',
+      owner: 'chinxzy',
+      repo: 'electron-test',
       private: true,
     })
     log.info('Checking for updates in packaged app...')
