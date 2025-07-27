@@ -110,7 +110,6 @@ app.whenReady().then(() => {
       provider: 'github',
       owner: 'chinxzy',
       repo: 'electron-test',
-      private: true,
     })
     log.info('Checking for updates in packaged app...')
     autoUpdater.checkForUpdatesAndNotify()
