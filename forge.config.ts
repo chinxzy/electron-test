@@ -91,8 +91,8 @@ const config: ForgeConfig = {
   publishers: [
     new PublisherGithub({
       repository: {
-        owner: 'lintint-tech',
-        name: 'oditorwebpos',
+        owner: 'chinxzy',
+        name: 'electron-test',
       },
       draft: true,
       prerelease: false,

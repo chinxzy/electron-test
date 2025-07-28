@@ -1,6 +1,6 @@
 {
   "name": "oditor",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "main": ".vite/main/index.cjs",
@@ -10,9 +10,9 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "lintint",
-        "repo": "oditorwebpos",
-        "private": true
+        "owner": "chinxzy",
+        "repo": "electron-test",
+        "private": false
       }
     ]
   },
