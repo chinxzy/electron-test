@@ -4,13 +4,11 @@ import fs from 'fs/promises'
 import os from 'os'
 // import { autoUpdater } from 'electron-updater' // Removed: No longer using electron-updater directly
 import log from 'electron-log' // Import electron-log for autoUpdater logging
-// import updateElectronApp from 'update-electron-app' // Original import: Caused "not callable" error
-// const updateElectronApp = require('update-electron-app').default // Previous attempt: Caused "default doesn't exist"
-// const updateElectronApp = require('update-electron-app') // Previous attempt: Still caused issues
 
-// Corrected: Import the entire module and then call it as a function.
-// This handles cases where the module's default export might be structured differently.
-const updateElectronApp = require('update-electron-app')
+// Corrected: Explicitly cast the require result to a callable function type.
+// This is a workaround for TypeScript's module resolution quirks when the
+// module's export structure is not perfectly aligned with standard ES Modules.
+const updateElectronApp = require('update-electron-app') as (options?: any) => void
 
 // This handles Squirrel.Windows startup events, crucial for installers
 if (require('electron-squirrel-startup')) {
@@ -106,39 +104,21 @@ app.whenReady().then(() => {
     // It automatically uses electron-updater under the hood and
     // defaults to GitHub releases.
     // Ensure your package.json has 'repository' field for auto-detection.
-    // Call updateElectronApp as a function.
-    // If 'require('update-electron-app')' returns an object with a default property,
-    // then 'updateElectronApp.default({ ... })' would be correct.
-    // If it returns the function directly, then 'updateElectronApp({ ... })' is correct.
-    // The previous error suggests it's not directly callable, so we're trying to ensure
-    // we get the callable part.
-    if (typeof updateElectronApp === 'function') {
-      updateElectronApp({
-        logger: log, // Pass electron-log for logging
-        // You can add other options here if needed, e.g.,
-        // updateInterval: '1 hour',
-        // notifyUser: true, // Default is true, shows native notifications
-        // github: {
-        //   owner: 'chinxzy', // Explicitly set if not in package.json
-        //   repo: 'electron-test', // Explicitly set if not in package.json
-        //   private: false, // Set to true if your repo is private
-        // },
-        // If you are using Squirrel.Windows with Electron Forge,
-        // update-electron-app should correctly find the RELEASES file.
-      })
-      log.info('App is packaged. Initializing update-electron-app...')
-    } else if (typeof updateElectronApp.default === 'function') {
-      updateElectronApp.default({
-        logger: log,
-      })
-      log.info('App is packaged. Initializing update-electron-app (via .default)...')
-    } else {
-      log.error(
-        'updateElectronApp is not a callable function or does not have a default export that is callable.',
-      )
-      log.error('Type of updateElectronApp:', typeof updateElectronApp)
-      log.error('Type of updateElectronApp.default:', typeof updateElectronApp.default)
-    }
+    updateElectronApp({
+      // Call updateElectronApp directly (now explicitly typed as a function)
+      logger: log, // Pass electron-log for logging
+      // You can add other options here if needed, e.g.,
+      // updateInterval: '1 hour',
+      // notifyUser: true, // Default is true, shows native notifications
+      // github: {
+      //   owner: 'chinxzy', // Explicitly set if not in package.json
+      //   repo: 'electron-test', // Explicitly set if not in package.json
+      //   private: false, // Set to true if your repo is private
+      // },
+      // If you are using Squirrel.Windows with Electron Forge,
+      // update-electron-app should correctly find the RELEASES file.
+    })
+    log.info('App is packaged. Initializing update-electron-app...')
   } else {
     log.info('App is in development mode, skipping auto-update check.')
   }
