@@ -2,8 +2,10 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import path from 'path'
 import fs from 'fs/promises'
 import os from 'os'
-import { autoUpdater } from 'electron-updater'
+// import { autoUpdater } from 'electron-updater' // Removed: No longer using electron-updater directly
 import log from 'electron-log' // Import electron-log for autoUpdater logging
+// import updateElectronApp from 'update-electron-app' // Original import: Caused "not callable" error
+const updateElectronApp = require('update-electron-app').default // Corrected: Access the default export
 
 // This handles Squirrel.Windows startup events, crucial for installers
 if (require('electron-squirrel-startup')) {
@@ -23,8 +25,8 @@ declare const MAIN_WINDOW_PRELOAD_VITE_URL: string | undefined
 
 let mainWin: BrowserWindow | null
 
-// Assign electron-log to autoUpdater's logger
-autoUpdater.logger = log
+// Assign electron-log to autoUpdater's logger (update-electron-app also uses it)
+// autoUpdater.logger = log // Removed: No longer assigning directly to autoUpdater
 
 function createWindow(): void {
   console.log('Main process: createWindow called.') // Log 1
@@ -92,77 +94,35 @@ app.whenReady().then(() => {
   console.log('Main process: app.whenReady fired.') // Log 5
   createWindow()
 
-  // 👉 AUTO-UPDATER LOGIC (MODIFIED AGAIN)
-  // Reverting to 'github' provider but adding 'url' and 'channel'
-  // for explicit Squirrel.Windows update pathing, which relies on RELEASES file.
+  // 👉 AUTO-UPDATER LOGIC (MODIFIED FOR update-electron-app)
   if (app.isPackaged) {
-    autoUpdater.setFeedURL({
-      provider: 'github',
-      // The 'url' here should be the base repository URL, not the download URL.
-      // electron-updater will then construct the Squirrel.Windows specific paths.
-
-      owner: 'chinxzy',
-      repo: 'electron-test',
-      private: false,
-      channel: 'latest', // Explicitly set the channel to 'latest'
+    // Initialize update-electron-app
+    // It automatically uses electron-updater under the hood and
+    // defaults to GitHub releases.
+    // Ensure your package.json has 'repository' field for auto-detection.
+    updateElectronApp({
+      // Corrected: Call updateElectronApp directly (now imported via require)
+      logger: log, // Pass electron-log for logging
+      // You can add other options here if needed, e.g.,
+      // updateInterval: '1 hour',
+      // notifyUser: true, // Default is true, shows native notifications
+      // github: {
+      //   owner: 'chinxzy', // Explicitly set if not in package.json
+      //   repo: 'electron-test', // Explicitly set if not in package.json
+      //   private: false, // Set to true if your repo is private
+      // },
+      // If you are using Squirrel.Windows with Electron Forge,
+      // update-electron-app should correctly find the RELEASES file.
     })
-    log.info('Checking for updates in packaged app...')
-    autoUpdater.checkForUpdatesAndNotify()
+    log.info('App is packaged. Initializing update-electron-app...')
   } else {
     log.info('App is in development mode, skipping auto-update check.')
   }
 
-  autoUpdater.on('checking-for-update', () => {
-    log.info('Checking for update...')
-  })
+  // Removed all autoUpdater.on(...) event listeners as update-electron-app handles UI/logging
+  // You can still add custom event listeners for update-electron-app if you need more control,
+  // but its primary goal is to simplify this.
 
-  autoUpdater.on('update-available', (info) => {
-    log.info('Update available:', info)
-    dialog
-      .showMessageBox(mainWin!, {
-        type: 'info',
-        title: 'Update Available',
-        message: `A new version ${info.version} is available. Do you want to download it now?`,
-        buttons: ['Yes', 'No'],
-      })
-      .then((result) => {
-        if (result.response === 0) {
-          autoUpdater.downloadUpdate()
-        }
-      })
-  })
-
-  autoUpdater.on('update-not-available', (info) => {
-    log.info('Update not available:', info)
-  })
-
-  autoUpdater.on('error', (err) => {
-    log.error('Error in auto-updater:', err)
-    dialog.showErrorBox('Update Error', `Error checking for updates: ${err.message}`)
-  })
-
-  autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = 'Download speed: ' + progressObj.bytesPerSecond
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
-    log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
-    log.info(log_message)
-  })
-
-  autoUpdater.on('update-downloaded', (info) => {
-    log.info('Update downloaded:', info)
-    dialog
-      .showMessageBox(mainWin!, {
-        type: 'info',
-        title: 'Update Ready',
-        message: 'Update downloaded. It will be installed on exit.',
-        buttons: ['Install now', 'Later'],
-      })
-      .then((result) => {
-        if (result.response === 0) {
-          autoUpdater.quitAndInstall()
-        }
-      })
-  })
   // 👉 END AUTO-UPDATER LOGIC
 
   ipcMain.handle('print-content', async (event, htmlContentUint8Array: Uint8Array) => {
