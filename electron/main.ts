@@ -92,13 +92,19 @@ app.whenReady().then(() => {
   console.log('Main process: app.whenReady fired.') // Log 5
   createWindow()
 
-  // 👉 AUTO-UPDATER LOGIC (MODIFIED)
+  // 👉 AUTO-UPDATER LOGIC (MODIFIED AGAIN)
+  // Reverting to 'github' provider but adding 'url' and 'channel'
+  // for explicit Squirrel.Windows update pathing, which relies on RELEASES file.
   if (app.isPackaged) {
-    // Changed provider to 'generic' and specified the full URL
-    // This forces electron-updater to look for the RELEASES file at this base URL.
     autoUpdater.setFeedURL({
-      provider: 'generic',
-      url: 'https://github.com/chinxzy/electron-test/releases/latest/download/', // Ensure this is the correct base URL
+      provider: 'github',
+      // The 'url' here should be the base repository URL, not the download URL.
+      // electron-updater will then construct the Squirrel.Windows specific paths.
+
+      owner: 'chinxzy',
+      repo: 'electron-test',
+      private: false,
+      channel: 'latest', // Explicitly set the channel to 'latest'
     })
     log.info('Checking for updates in packaged app...')
     autoUpdater.checkForUpdatesAndNotify()
