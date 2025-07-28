@@ -5,7 +5,8 @@ import os from 'os'
 // import { autoUpdater } from 'electron-updater' // Removed: No longer using electron-updater directly
 import log from 'electron-log' // Import electron-log for autoUpdater logging
 // import updateElectronApp from 'update-electron-app' // Original import: Caused "not callable" error
-const updateElectronApp = require('update-electron-app').default // Corrected: Access the default export
+// const updateElectronApp = require('update-electron-app').default // Previous attempt: Caused "default doesn't exist"
+const updateElectronApp = require('update-electron-app') // Corrected: Direct require, assuming it's the callable function
 
 // This handles Squirrel.Windows startup events, crucial for installers
 if (require('electron-squirrel-startup')) {
@@ -96,6 +97,7 @@ app.whenReady().then(() => {
 
   // 👉 AUTO-UPDATER LOGIC (MODIFIED FOR update-electron-app)
   if (app.isPackaged) {
+    log.info('App is packaged, attempting update initialization.') // Added log
     // Initialize update-electron-app
     // It automatically uses electron-updater under the hood and
     // defaults to GitHub releases.
