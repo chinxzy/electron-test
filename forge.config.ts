@@ -10,49 +10,35 @@ import { PublisherGithub } from '@electron-forge/publisher-github'
 
 const config: ForgeConfig = {
   packagerConfig: {
-    // --- Essential properties ---
     appBundleId: 'com.oditor',
-    // productName: 'Oditor web pos', // REMOVED: 'productName' is not a direct property of ForgePackagerOptions
-    // The product name is typically derived from the 'name' in package.json
-    // or can be set at the top-level ForgeConfig if needed, but not in packagerConfig directly.
-    icon: 'public/images/OditorLogo.ico', // Ensure this path is correct
+    icon: 'public/images/OditorLogo.ico', // Ensure this path is correct relative to your project root
     prune: true, // Prune devDependencies
-
-    // --- CRITICAL: The ignore array to prevent packaging unnecessary files ---
-    ignore: [
-      // Common ignores for a Vite/Electron project
-      /^\/(src|build|public|tsconfig.*|vite\.config.*|forge\.config.*|README\.md|yarn\.lock|pnpm-lock\.yaml|\.git|\.github|\.vscode|.*\.(ts|map))$/,
-      // Specific ignores for Electron Forge's own modules and build tools
-      /node_modules\/electron-forge/,
-      /node_modules\/@electron-forge/,
-      /node_modules\/vite/,
-      /node_modules\/typescript/,
-      /^\/src($|\/)/, // Ignore source code folder
-      /^\/tests?($|\/)/, // Ignore test files
-      /\.gitignore/,
-      /tsconfig\.json/,
-      /vite\.config\.ts/,
-      /webpack\..*\.js/,
-      /\.env.*$/,
-      /README\.md/,
-      // Add any other specific files/folders you want to exclude that are not covered above
-    ],
-    // --- End essential properties ---
-
     asar: true, // Keep ASAR packaging
+
+    // --- REVISED: Simplified ignore array ---
+    // This ignore array is more standard and less likely to accidentally exclude vital app files.
+    // VitePlugin handles bundling, so you generally don't need to ignore your source code here.
+    ignore: [
+      /^\/(src|build|public|tsconfig.*|vite\.config.*|forge\.config.*|README\.md|yarn\.lock|pnpm-lock\.yaml|\.git|\.github|\.vscode|.*\.(ts|map))$/,
+      // Keep other specific files you know should be ignored, but be careful with broad regexes.
+      // Example: If 'src' contains only source code and is bundled, you might not need to ignore it here.
+      // If 'public' contains assets you want to include, don't ignore it.
+      // The initial regex `^\/(src|build|public|...)` is already quite comprehensive.
+      // Let's remove the redundant `/^\/src($|\/)/` to be safe.
+      /\.env.*$/, // Ignore .env files
+    ],
+    // --- End revised ignore array ---
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({
       setupIcon: 'public/images/OditorLogo.ico', // Path to the .ico file for the installer itself
-      // 👉 CRITICAL FIX: Uncomment and set this to a publicly accessible URL for your icon.
-      // This URL is used by Squirrel.Windows to generate the app-update.yml.
-      iconUrl: 'https://stoditorfiles.blob.core.windows.net/logo-files/OditorLogo.ico', // Example: Replace with your actual public URL
+      iconUrl: 'https://stoditorfiles.blob.core.windows.net/logo-files/OditorLogo.ico', // Ensure this is a public, valid URL
       noMsi: true,
       setupExe: 'Oditor Setup.exe',
     }),
     new MakerZIP({}, ['darwin']), // Only macOS ZIP, as per simplified makers
-    // If you want to build for Linux, uncomment these only if you have the necessary cross-compilation tools
+    // Uncomment these if you intend to build for Linux and have the necessary tools
     // new MakerRpm({}),
     // new MakerDeb({})
   ],
@@ -91,11 +77,12 @@ const config: ForgeConfig = {
   publishers: [
     new PublisherGithub({
       repository: {
-        owner: 'chinxzy',
-        name: 'electron-test',
+        owner: 'chinxzy', // Double-check this is your exact GitHub username/org
+        name: 'electron-test', // Double-check this is your exact repo name
       },
-      draft: true,
-      prerelease: false,
+      // --- CRITICAL FIX: Change draft to false ---
+      draft: false, // Change this to false to create a public release
+      prerelease: false, // Keep this as false for a standard release
     }),
   ],
 }
