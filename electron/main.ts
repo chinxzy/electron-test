@@ -33,26 +33,14 @@ function createWindow(): void {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     // In development, if the URL is injected, use it.
     // This is how Forge typically handles it in dev.
-    preloadPath = path.join(
-      app.getAppPath(),
-      '.vite',
-      'preload',
-
-      'preload.js',
-    )
+    preloadPath = path.join(app.getAppPath(), '.vite', 'preload', 'preload.js')
     console.log(`Main process: (Dev) Using preload path: ${preloadPath}`)
   } else {
     // 👉 CRITICAL FIX FOR PRODUCTION PRELOAD PATH:
     // When packaged, __dirname points to app.asar/.vite/main/
     // Preload.cjs is at app.asar/.vite/renderer/${MAIN_WINDOW_VITE_NAME}/preload.cjs
     // We need to construct the path relative to the app's root (app.asar)
-    preloadPath = path.join(
-      app.getAppPath(),
-      '.vite',
-      'preload',
-
-      'preload.js',
-    )
+    preloadPath = path.join(app.getAppPath(), '.vite', 'preload', 'preload.js')
     console.log(`Main process: (Prod) Using preload path: ${preloadPath}`)
   }
 
@@ -104,13 +92,13 @@ app.whenReady().then(() => {
   console.log('Main process: app.whenReady fired.') // Log 5
   createWindow()
 
-  // 👉 AUTO-UPDATER LOGIC
+  // 👉 AUTO-UPDATER LOGIC (MODIFIED)
   if (app.isPackaged) {
+    // Changed provider to 'generic' and specified the full URL
+    // This forces electron-updater to look for the RELEASES file at this base URL.
     autoUpdater.setFeedURL({
-      provider: 'github',
-      owner: 'chinxzy',
-      repo: 'electron-test',
-      private: false,
+      provider: 'generic',
+      url: 'https://github.com/chinxzy/electron-test/releases/latest/download/', // Ensure this is the correct base URL
     })
     log.info('Checking for updates in packaged app...')
     autoUpdater.checkForUpdatesAndNotify()
