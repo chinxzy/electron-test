@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div class="bg-white overflow-hidden flex-1">
+    <div class="bg-danger overflow-hidden flex-1">
       <div class="md:px-20 px-6 py-14 md:w-33rem mx-auto" id="modal-container">
         <div id="modal-container"></div>
 
