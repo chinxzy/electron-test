@@ -1,6 +1,6 @@
 {
   "name": "oditor",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "private": true,
   "type": "module",
   "main": ".vite/main/index.cjs",

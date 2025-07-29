@@ -109,7 +109,6 @@ app.whenReady().then(() => {
         logger: log,
         updateInterval: '1 hour',
         notifyUser: true,
-        repo: 'your-company/your-repo', // optional, only if `package.json` is missing it
       })
       log.info('✅ update-electron-app initialized.')
     } catch (error) {
