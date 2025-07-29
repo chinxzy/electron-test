@@ -8,7 +8,7 @@ import log from 'electron-log' // Import electron-log for autoUpdater logging
 // Corrected: Explicitly cast the require result to a callable function type.
 // This is a workaround for TypeScript's module resolution quirks when the
 // module's export structure is not perfectly aligned with standard ES Modules.
-const updateElectronApp = require('update-electron-app') as (options?: any) => void
+import { updateElectronApp } from 'update-electron-app'
 
 // This handles Squirrel.Windows startup events, crucial for installers
 if (require('electron-squirrel-startup')) {
@@ -104,21 +104,17 @@ app.whenReady().then(() => {
     // It automatically uses electron-updater under the hood and
     // defaults to GitHub releases.
     // Ensure your package.json has 'repository' field for auto-detection.
-    updateElectronApp({
-      // Call updateElectronApp directly (now explicitly typed as a function)
-      logger: log, // Pass electron-log for logging
-      // You can add other options here if needed, e.g.,
-      // updateInterval: '1 hour',
-      // notifyUser: true, // Default is true, shows native notifications
-      // github: {
-      //   owner: 'chinxzy', // Explicitly set if not in package.json
-      //   repo: 'electron-test', // Explicitly set if not in package.json
-      //   private: false, // Set to true if your repo is private
-      // },
-      // If you are using Squirrel.Windows with Electron Forge,
-      // update-electron-app should correctly find the RELEASES file.
-    })
-    log.info('App is packaged. Initializing update-electron-app...')
+    try {
+      updateElectronApp({
+        logger: log,
+        updateInterval: '1 hour',
+        notifyUser: true,
+        repo: 'your-company/your-repo', // optional, only if `package.json` is missing it
+      })
+      log.info('✅ update-electron-app initialized.')
+    } catch (error) {
+      log.error('❌ Failed to initialize auto updater:', error)
+    }
   } else {
     log.info('App is in development mode, skipping auto-update check.')
   }
